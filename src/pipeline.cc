@@ -150,8 +150,10 @@ std::string getCachePath(std::string src) {
   for (auto &[root, _] : g_config->workspaceFolders)
     if (StringRef(src).startswith(root)) {
       auto len = root.size();
-      return g_config->cache.directory +
-             escapeFileName(root.substr(0, len - 1)) + '/' +
+      auto workspaceFolderPath =
+          g_config->cache.directory + escapeFileName(root.substr(0, len - 1));
+      sys::fs::create_directories(workspaceFolderPath, true);
+      return workspaceFolderPath + '/' + 
              escapeFileName(src.substr(len));
     }
   return g_config->cache.directory + '@' +
