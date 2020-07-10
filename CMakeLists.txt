@@ -1,7 +1,15 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(ccls LANGUAGES CXX)
 
 option(USE_SYSTEM_RAPIDJSON "Use system RapidJSON instead of the git submodule if exists" ON)
+
+if ("${CCLS_PROFILE}" STREQUAL GENERATE)
+  add_compile_options(-fprofile-instr-generate)
+  add_link_options(-fprofile-instr-generate)
+elseif("${CCLS_PROFILE}" STREQUAL USE)
+  add_compile_options(-fprofile-instr-use=${CCLS_PROFDATA})
+  add_link_options(-fprofile-instr-use=${CCLS_PROFDATA})
+endif()
 
 # Sources for the executable are specified at end of CMakeLists.txt
 add_executable(ccls "")
@@ -21,6 +29,13 @@ was specified.")
   # Set the possible values of build type for cmake-gui
   set_property(CACHE CMAKE_BUILD_TYPE
                PROPERTY STRINGS Debug Release MinSizeRel RelWithDebInfo)
+endif()
+
+if ("${CCLS_LTO}")
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT LTO_SUPPORTED)
+  set_property(TARGET ccls PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  set(CMAKE_CXX_COMPILE_OPTIONS_IPO "-flto=${CCLS_LTO_FLAVOR}")
 endif()
 
 ### Compile options
