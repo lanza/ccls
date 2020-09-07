@@ -16,6 +16,19 @@ struct Param : TextDocumentPositionParam {
 REFLECT_STRUCT(Param, textDocument, position, kind);
 } // namespace
 
+void MessageHandler::ccls_generateImplementations(JsonReader &reader, ReplyOnce &reply) {
+  Param param;
+  reflect(reader, param);
+  auto [file, wf] = findOrFail(param.textDocument.uri.getPath(), reply);
+  if (!wf)
+    return;
+
+  for (auto [sym, refcnt] : file->symbol2refcnt)
+    ;
+
+
+}
+
 void MessageHandler::ccls_vars(JsonReader &reader, ReplyOnce &reply) {
   Param param;
   reflect(reader, param);
